@@ -104,3 +104,39 @@ http://10.0.0.100 [200 OK] Apache[2.4.38], Country[RESERVED][ZZ], HTTPServer[Deb
 ```
 
 De aquí tampoco podemos obtener información adicional.
+
+#### Escaneo de urls
+
+A priori no tenemos mucha más información que nos permita tirar del hilo, así que vamos a realizar un descubrimientos de urls a través de un diccionario. Para ello utilizaremos gobuster con un diccionario con rutas típicas de contenido web:
+
+```bash
+gobuster dir --url http://10.0.0.100 --wordlist /usr/share/dirbuster/wordlists/directory-list-1.0.txt
+```
+
+Resultado:
+
+```text
+==============================================================
+Gobuster v3.1.0
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://10.0.0.100
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/dirbuster/wordlists/directory-list-1.0.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.1.0
+[+] Timeout:                 10s
+===============================================================
+2023/01/18 19:18:01 Starting gobuster in directory enumeration mode
+===============================================================
+/blog                 (Status: 301) [Size: 307] [--> http://10.0.0.100/blog/]
+                                                                             
+===============================================================
+2023/01/18 19:19:01 Finished
+===============================================================
+```
+
+Como podemos observar del resultado nos ha descubierto una nueva ruta con la que trabajar:
+
+* /blog
