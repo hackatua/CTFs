@@ -71,17 +71,15 @@ Mediante esta consulta podemos concluir las versiones y servicios que se están 
 
 Lo primero que podemos hacer es ir la url de la máquina en el navegador y ver que se está exponiendo miendante el protocolo HTTP:
 
-![alt http landing page](http_landig_page.png)
+![http landing page](http_landig_page.png)
 
 Viendo el inspector vemos que no podemos obtener ningún tipo de información del código fuente de la página. Parece ser simplemente una imagen codificada directamente en el HTML.
-
-#### Tecnologías usadas
 
 Lo siguiente que podemos hacer es tratar de ver si podemos obtener alguna información sobre las tecnologías usadas para la web (auque viendo el HTML ya podemos deducir que no vamos a poder obtener mucha información de aquí).
 
 Ya que tenemos el navegador abierto podemos usar la extensión de navegador [Wappalizer](https://www.wappalyzer.com/) para ver qué información nos da.
 
-![alt http landing page wappalyzer](http_landig_page_wappalylez.png)
+![http landing page wappalyzer](http_landig_page_wappalylez.png)
 
 Cómo ya podíamos intuir, no hemos obtenido ninguna información útil que no supiéramos ya del escaneo de puertos.
 
@@ -98,8 +96,6 @@ http://10.0.0.100 [200 OK] Apache[2.4.38], Country[RESERVED][ZZ], HTTPServer[Deb
 ```
 
 De aquí tampoco podemos obtener información adicional.
-
-#### Escaneo de urls
 
 A priori no tenemos mucha más información que nos permita tirar del hilo, así que vamos a realizar un descubrimientos de urls a través de un diccionario. Para ello utilizaremos gobuster con un diccionario con rutas típicas de contenido web:
 
@@ -136,3 +132,49 @@ Como podemos observar del resultado nos ha descubierto una nueva ruta con la que
 * /blog
 
 ### El blog (/blog)
+
+Ahora que tenemos esta nueva ruta vamos a ver qué podemos encontrar allí:
+
+![http blog page dns](http_blog_page_dns.png)
+
+Cómo podemos observar hay recursos de la página que no está cargando correctamente. Estos recursos apuntan a un dominio que nuestra máquina atacante no es capaz de resolver (wordpress.aragog.hogwarts):
+
+```bash
+ping -c 1 wordpress.aragog.hogwarts
+```
+
+Resultado:
+
+```text
+ping: wordpress.aragog.hogwarts: Name or service not known
+```
+
+Este problema es muy típico cuando hacemos CTFs. Lo único que tenemos que hacer es agregar ese dominio a nuestro `/etc/hosts`:
+
+```text
+10.0.0.100 wordpress.aragog.hogwarts
+```
+
+Tras esto, si refrescamos la página ya podremos verla correctamente y los recursos cargarán con normalidad:
+
+![http blog page](http_blog_page.png)
+
+Ahora que tenemos la web funcionando correctamente podemos tratar de ver qué tecnologías se están usando, aunque ya podemos hacernos una idea que al menos WordPress se usa simplemente viendo los textos de la página. Al igual que antes, vamos a usar Wappalyzer para ver qué información nos da:
+
+![http blog page wappalyzer](http_blog_page_wappalyzer.png)
+
+Ahora ya podemos ver un poco más de información como que es un WordPress (que usa PHP), y que tiene una base de datos MySQL.
+
+Para contrastar podemos usar, al igual que antes, la herramienta de terminal whatweb:
+
+```bash
+whatweb http://10.0.0.100/blog/
+```
+
+Resultado:
+
+```text
+http://10.0.0.100/blog/ [200 OK] Apache[2.4.38], Country[RESERVED][ZZ], HTML5, HTTPServer[Debian Linux][Apache/2.4.38 (Debian)], IP[10.0.0.100], MetaGenerator[WordPress 5.0.12], PoweredBy[WordPress,WordPress,], Script[text/javascript], Title[Blog &#8211; Just another WordPress site], UncommonHeaders[link], WordPress[5.0.12]
+```
+
+Como podemos observar, nos confirma la información que ya sabíamos por Wappalyzer y, de manera adicional, nos dice que se está usando la versión 5.0.12 de Wordpress.
