@@ -4,9 +4,7 @@
 
 Aragor es la primera de tres CTFs de la serie de Harry Potter en la cual tienes que encontrar 2 horcruxes (hay un total de 8 horcruxes escondidos a lo largo de las máquinas de la serie) para poder derrotar a Voldemort.
 
-## Reconocimiento
-
-### Descubrimiento de puertos
+## Escaneo de puertos
 
 Inicialmente tenemos que detectar los todos los puertos abiertos de manera rápida. Para ello hacemos un escaneo de puertos completo (`-p-`) filtrando por los puertos abiertos (`--open`) deshabilitando la resolución DNS (`-n`) y el descubrimiento de hosts (`-Pn`):
 
@@ -67,9 +65,9 @@ Mediante esta consulta podemos concluir las versiones y servicios que se están 
 * `22/tcp`: **SSH** - OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)
 * `80/tcp`: **HTTP** - Apache httpd 2.4.38 ((Debian))
 
-### Análisis del servicio HTTP (80/tcp)
+## Análisis del servicio HTTP (80/tcp)
 
-#### La web
+### La home (/)
 
 Lo primero que podemos hacer es ir la url de la máquina en el navegador y ver que se está exponiendo miendante el protocolo HTTP:
 
@@ -81,15 +79,11 @@ Viendo el inspector vemos que no podemos obtener ningún tipo de información de
 
 Lo siguiente que podemos hacer es tratar de ver si podemos obtener alguna información sobre las tecnologías usadas para la web (auque viendo el HTML ya podemos deducir que no vamos a poder obtener mucha información de aquí).
 
-##### Wappalyzer
-
 Ya que tenemos el navegador abierto podemos usar la extensión de navegador [Wappalizer](https://www.wappalyzer.com/) para ver qué información nos da.
 
 ![alt http landing page wappalyzer](http_landig_page_wappalylez.png)
 
 Cómo ya podíamos intuir, no hemos obtenido ninguna información útil que no supiéramos ya del escaneo de puertos.
-
-##### Whatweb
 
 De forma alternativa podemos usar una herramienta de terminal para obtener más información de la web, por ejemplo la herramienta whatweb:
 
@@ -140,3 +134,5 @@ by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
 Como podemos observar del resultado nos ha descubierto una nueva ruta con la que trabajar:
 
 * /blog
+
+### El blog (/blog)
