@@ -66,3 +66,41 @@ Mediante esta consulta podemos concluir las versiones y servicios que se están 
 
 * `22/tcp`: **SSH** - OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)
 * `80/tcp`: **HTTP** - Apache httpd 2.4.38 ((Debian))
+
+### Análisis del servicio HTTP (80/tcp)
+
+#### La web
+
+Lo primero que podemos hacer es ir la url de la máquina en el navegador y ver que se está exponiendo miendante el protocolo HTTP:
+
+![alt http landing page](http_landig_page.png)
+
+Viendo el inspector vemos que no podemos obtener ningún tipo de información del código fuente de la página. Parece ser simplemente una imagen codificada directamente en el HTML.
+
+#### Tecnologías usadas
+
+Lo siguiente que podemos hacer es tratar de ver si podemos obtener alguna información sobre las tecnologías usadas para la web (auque viendo el HTML ya podemos deducir que no vamos a poder obtener mucha información de aquí).
+
+##### Wappalyzer
+
+Ya que tenemos el navegador abierto podemos usar la extensión de navegador [Wappalizer](https://www.wappalyzer.com/) para ver qué información nos da.
+
+![alt http landing page wappalyzer](http_landig_page_wappalylez.png)
+
+Cómo ya podíamos intuir, no hemos obtenido ninguna información útil que no supiéramos ya del escaneo de puertos.
+
+##### Whatweb
+
+De forma alternativa podemos usar una herramienta de terminal para obtener más información de la web, por ejemplo la herramienta whatweb:
+
+```bash
+whatweb 10.0.0.100
+```
+
+Resultado:
+
+```text
+http://10.0.0.100 [200 OK] Apache[2.4.38], Country[RESERVED][ZZ], HTTPServer[Debian Linux][Apache/2.4.38 (Debian)], IP[10.0.0.100]
+```
+
+De aquí tampoco podemos obtener información adicional.
