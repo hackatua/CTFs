@@ -303,3 +303,39 @@ Ahí vemos que a parte de usuario www-data (que es el usuario al que tenemos acc
 * root
 * ginny
 * hagrid98
+
+Sabiendo que estamos ante un WordPress, podemos buscar el archivo con las credenciales de la base de datos y ver ahí que encontramos. Para ello podemos usar grep e ir buscando en directorios típicos como el `/etc`:
+
+```bash
+grep -rnw /etc -e "define('DB_PASSWORD"
+```
+
+Resultado:
+
+```text
+grep: /etc/security/opasswd: Permission denied
+grep: /etc/.pwd.lock: Permission deniednw / -e "define('DB_PASSWORD" | grep DB_PA
+grep: /etc/shadow-: Permission denied
+grep: /etc/gshadow: Permission denied
+/etc/wordpress/config-default.php:4:define('DB_PASSWORD', 'mySecr3tPass');
+grep: /etc/ssh/ssh_host_rsa_key: Permission denied
+grep: /etc/ssh/ssh_host_ecdsa_key: Permission denied
+grep: /etc/ssh/ssh_host_ed25519_key: Permission denied
+grep: /etc/mysql/debian.cnf: Permission denied
+grep: /etc/shadow: Permission denied
+grep: /etc/ssl/private: Permission denied
+grep: /etc/gshadow-: Permission denied
+```
+
+De dónde podemos extraer que el fichero donde se encuentran las credenciales es `/etc/wordpress/config-default.php`, y vienod el contenido podemos obtener todos los datos necesarios para conectarnos con la base de datos:
+
+```php
+<?php
+define('DB_NAME', 'wordpress');
+define('DB_USER', 'root');
+define('DB_PASSWORD', 'mySecr3tPass');
+define('DB_HOST', 'localhost');
+define('DB_COLLATE', 'utf8_general_ci');
+define('WP_CONTENT_DIR', '/usr/share/wordpress/wp-content');
+?>
+```
