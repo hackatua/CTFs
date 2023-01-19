@@ -287,3 +287,19 @@ Ahora, para poder tener una shell completamente interactiva lanzamos una pseudo 
 * `export SHELL=bash`
 
 Con esto ya deberíamos poder hacer `Ctrl + c` para terminar la ejecución de un comando, o `Ctrl + l`para limpiar la terminal. También podemos ir atrás en el histórico de comandos.
+
+Una vez que ya tenemos la shell preparada, podemos empezar a obtener más información. Para empezar, podemos obtener el listado de usuarios de la máquina. Para ello podemos hacer un `cat /etc/passwd` obteninedo lo siguiente:
+
+```text
+root:x:0:0:root:/root:/bin/bash
+...
+ginny:x:1001:1001::/home/ginny:/bin/sh
+hagrid98:x:1000:1000:Hagrid,,,:/home/hagrid98:/bin/bash
+www-data@Aragog:/usr/share/wordpress/wp-content/plugins/wp-file-manager/lib/files$
+```
+
+Ahí vemos que a parte de usuario www-data (que es el usuario al que tenemos acceso ahora mismo) tenemos los siguientes usuarios:
+
+* root
+* ginny
+* hagrid98
